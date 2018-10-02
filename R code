@@ -1,0 +1,63 @@
+# Read file with AUC values,their variance and moderators (Defect.code,Defect.area, Study) and perform Random effects meta-analysis
+
+> var<-read.csv(file="/Users/a****/Desktop/AUC.Final.15.9.csv", header=T)
+> vr<-rma(yi=var$AUC, vi=var$variance, data=var,method="REML")
+> summary (vr)
+
+Random-Effects Model (k = 37; tau^2 estimator: REML)
+
+  logLik  deviance       AIC       BIC      AICc  
+ 22.1035  -44.2069  -40.2069  -37.0399  -39.8433  
+
+tau^2 (estimated amount of total heterogeneity): 0.0139 (SE = 0.0040)
+tau (square root of estimated tau^2 value):      0.1179
+I^2 (total heterogeneity / total variability):   95.72%
+H^2 (total variability / sampling variability):  23.35
+
+Test for Heterogeneity: 
+Q(df = 36) = 1307.4819, p-val < .0001
+
+Model Results:
+
+estimate       se     zval     pval    ci.lb    ci.ub          
+  0.7792   0.0217  35.9330   <.0001   0.7367   0.8217      *** 
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+
+# Mixed-effects model
+
+> vrmix<-rma(yi=var$AUC, vi=var$variance, data=var,method="REML", mods=cbind(Defect.code,Defect.area, Study))
+> 
+> vrmix
+
+Mixed-Effects Model (k = 37; tau^2 estimator: REML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.0068 (SE = 0.0023)
+tau (square root of estimated tau^2 value):             0.0825
+I^2 (residual heterogeneity / unaccounted variability): 89.59%
+H^2 (unaccounted variability / sampling variability):   9.61
+R^2 (amount of heterogeneity accounted for):            51.03%
+
+Test for Residual Heterogeneity: 
+QE(df = 33) = 398.1915, p-val < .0001
+
+Test of Moderators (coefficient(s) 2,3,4): 
+QM(df = 3) = 34.3455, p-val < .0001
+
+Model Results:
+
+             estimate      se     zval    pval    ci.lb    ci.ub     
+intrcpt        1.1785  0.0755  15.6125  <.0001   1.0306   1.3265  ***
+Defect.code   -0.1441  0.0247  -5.8259  <.0001  -0.1926  -0.0956  ***
+Defect.area   -0.0012  0.0029  -0.3980  0.6906  -0.0070   0.0046     
+Study         -0.0346  0.0086  -4.0139  <.0001  -0.0516  -0.0177  ***
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+#Funnel plot and Forest plot
+> funnel(vr, xlab="Observed outcome:AUC values")
+> funnel(vrmix, xlab="Observed residual values", main="Funnel plot for mixed-effects model")
+ forest(vr, slab=paste(r$Study, r$Defect.Type, r$Defect.Height,r$Defect.width, sep=","), ilab.xpos= c (-2),addcred=TRUE, xlab='Outcome:AUC', order='obs',cex=0.55, addfit=TRUE,col='light blue', border='blue', at=c(0,0.25,0.5,0.75,1), main="Forest Plot of AUC outcomes", clim=c(0,1),refline=NA)
